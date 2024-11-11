@@ -1,0 +1,101 @@
+import 'package:app_academia/data/repositories/data_firebase/auth_repository.dart';
+import 'package:flutter/material.dart';
+
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
+
+  @override
+  _RegisterScreenState createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends State<RegisterScreen> {
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _authRepository = AuthRepositoryImpl();
+
+  String? _errorMessage;
+
+  Future<void> _register() async {
+    try {
+      final name = _nameController.text;
+      final email = _emailController.text;
+      final password = _passwordController.text;
+
+      await _authRepository.registerWithEmailPassword(email, password);
+      Navigator.pushReplacementNamed(context, '/login');
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Falha no registro: $e';
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Obtem a altura e largura da tela
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Registrar-se')),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: screenWidth * 0.1, // Responsivo: 10% da largura da tela
+            vertical: screenHeight * 0.02, // Responsivo: 2% da altura da tela
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (_errorMessage != null)
+                Padding(
+                  padding: EdgeInsets.only(bottom: screenHeight * 0.02),
+                  child: Text(
+                    _errorMessage!,
+                    style: const TextStyle(color: Colors.red),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              TextField(
+                controller: _nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Nome',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(height: screenHeight * 0.02), // Espaçamento responsivo
+              TextField(
+                controller: _emailController,
+                decoration: const InputDecoration(
+                  labelText: 'Email',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.emailAddress,
+              ),
+              SizedBox(height: screenHeight * 0.02),
+              TextField(
+                controller: _passwordController,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  labelText: 'Senha',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(height: screenHeight * 0.04),
+              ElevatedButton(
+                onPressed: _register,
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(
+                    vertical: screenHeight * 0.02, // Altura do botão responsiva
+                  ),
+                ),
+                child: const Text('Registrar'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
